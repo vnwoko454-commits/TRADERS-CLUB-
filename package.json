@@ -1,0 +1,31 @@
+
+{
+"name": "vankleff-solana-hunter-backend",
+"version": "1.0.0",
+"private": true,
+"type": "commonjs",
+"main": "dist/server.js",
+"scripts": {
+"dev": "tsx watch src/server.ts",
+"build": "tsc -p tsconfig.json",
+"start": "node dist/server.js",
+"typecheck": "tsc --noEmit"
+},
+"dependencies": {
+"@solana/web3.js": "^1.95.3",
+"@types/cors": "^2.8.17",
+"@types/express": "^4.17.21",
+"@types/node": "^20.14.0",
+"@types/ws": "^8.5.12",
+"axios": "^1.7.7",
+"bs58": "^4.0.0",
+"cors": "^2.8.5",
+"dotenv": "^16.4.5",
+"express": "^4.21.0",
+"typescript": "^5.6.2",
+"ws": "^8.18.0"
+},
+"devDependencies": {
+"tsx": "^4.19.1"
+}
+}
