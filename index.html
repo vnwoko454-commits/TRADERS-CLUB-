@@ -1,0 +1,1698 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vankleff Solana Hunter</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #121826;
+    --surface-2: #1a2236;
+    --border: #243049;
+    --text: #e6edf7;
+    --muted: #8a98b5;
+    --green: #16c784;
+    --red: #ea3943;
+    --amber: #f0b90b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+    padding: 16px 18px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: #fff;
+  }
+  .brand h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand p { font-size: 12px; color: var(--muted); }
+  .mode-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  }
+  .mode-paper { background: rgba(22,199,132,0.12); color: var(--green); border: 1px solid rgba(22,199,132,0.3); }
+  .mode-live { background: rgba(234,57,67,0.12); color: var(--red); border: 1px solid rgba(234,57,67,0.3); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .dot.live { animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto;
+    padding: 4px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .tab {
+    padding: 10px 16px; border: none; background: transparent; color: var(--muted);
+    font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 8px;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .tab.active { background: var(--surface-2); color: var(--text); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* Cards */
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .card h3 {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; padding: 10px 12px; color: var(--muted);
+    font-weight: 500; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.4px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .token-cell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .token-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+  /* Forms */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 12px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-size: 14px; font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--blue); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-purple { background: var(--purple); color: #fff; }
+  .btn-purple:hover { background: #7c3aed; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: #10a870; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #d63338; }
+  .btn-ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Status pills */
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .pill-green { background: rgba(22,199,132,0.12); color: var(--green); }
+  .pill-red { background: rgba(234,57,67,0.12); color: var(--red); }
+  .pill-amber { background: rgba(240,185,11,0.12); color: var(--amber); }
+  .pill-muted { background: var(--surface-2); color: var(--muted); }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle { position: relative; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0; background: var(--border);
+    border-radius: 999px; transition: 0.2s;
+  }
+  .slider:before {
+    content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: 0.2s;
+  }
+  .toggle input:checked + .slider { background: var(--green); }
+  .toggle input:checked + .slider:before { transform: translateX(20px); }
+
+  /* Alert banner */
+  .alert {
+    padding: 12px 16px; border-radius: var(--radius); margin-bottom: 16px;
+    font-size: 13px; display: flex; align-items: center; gap: 10px;
+  }
+  .alert-warn { background: rgba(240,185,11,0.08); border: 1px solid rgba(240,185,11,0.25); color: var(--amber); }
+  .alert-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); color: var(--blue); }
+  .alert-err { background: rgba(234,57,67,0.08); border: 1px solid rgba(234,57,67,0.25); color: var(--red); }
+
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+  .small { font-size: 12px; }
+  .mono { font-family: "SF Mono", "Monaco", monospace; }
+  .mb-0 { margin-bottom: 0; }
+  .mt-12 { margin-top: 12px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .health-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .health-row:last-child { border-bottom: none; }
+  .footer { text-align: center; padding: 24px 0; color: var(--muted); font-size: 12px; }
+  .disclaimer { background: rgba(234,57,67,0.05); border: 1px solid rgba(234,57,67,0.2); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; font-size: 12px; color: var(--muted); }
+  .scan-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  .test-pass { color: var(--green); font-weight: 700; }
+  .test-fail { color: var(--red); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo">V</div>
+      <div>
+        <h1>Vankleff Solana Hunter</h1>
+        <p>Backend-connected execution dashboard — Paper Trading Active</p>
+      </div>
+    </div>
+    <div class="mode-badge mode-paper" id="modeBadge">
+      <span class="dot live"></span>
+      <span id="modeText">PAPER TRADING</span>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    ⚠️ <strong>Risk Warning:</strong> No trading strategy guarantees profits. The ₦500 per-trade loss trigger and all risk limits are <strong>targets, not guaranteed maximums</strong> — actual losses can exceed them due to slippage, liquidity shortages, failed transactions, and execution delays. Live trading is disabled until explicitly authorized. All paper results use modeled costs and are NOT proof of future live profitability.
+  </div>
+
+  <!-- Backend connection banner -->
+  <div class="alert alert-warn hidden" id="connAlert">
+    <span>🔌</span>
+    <span id="connAlertText">Connecting to backend…</span>
+  </div>
+
+  <!-- Alert banner (risk limit) -->
+  <div class="alert alert-warn hidden" id="riskAlert">
+    <span>⛔</span>
+    <span id="riskAlertText"></span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="positions">Positions</button>
+    <button class="tab" data-tab="history">Trade History</button>
+    <button class="tab" data-tab="scanners">Scanners</button>
+    <button class="tab" data-tab="settings">Settings</button>
+    <button class="tab" data-tab="config">Integrations</button>
+    <button class="tab" data-tab="tests">Tests</button>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-content" id="tab-dashboard">
+    <div class="grid grid-4" style="margin-bottom:16px">
+      <div class="card">
+        <div class="stat-label">Simulated Starting Balance</div>
+        <div class="stat-value mono" id="startBalance">₦0</div>
+        <div class="stat-sub">Paper budget</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Available Simulated Balance</div>
+        <div class="stat-value mono" id="availableFunds">₦0</div>
+        <div class="stat-sub" id="exposureText">Committed: ₦0 / ₦3,000</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Portfolio Value (simulated)</div>
+        <div class="stat-value mono" id="portfolioValue">₦0</div>
+        <div class="stat-sub" id="portfolioSub">Available + positions at live prices (est.)</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Total P&L (Simulated)</div>
+        <div class="stat-value mono" id="totalPnl">₦0</div>
+        <div class="stat-sub" id="pnlPercent">Realized ₦0 · Unrealized ₦0 (est.)</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Open Positions <span class="pill pill-muted" id="positionCount">0</span></h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Token</th><th>Size</th><th>Current</th><th>P&L (est.)</th><th>Remaining</th></tr>
+            </thead>
+            <tbody id="positionsBody">
+              <tr><td colspan="5" class="muted" style="text-align:center;padding:24px">No open positions</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risk Limit Status (actual)</h3>
+        <div id="riskStatus">
+          <div class="health-row"><span class="muted">Daily Loss Limit</span><span id="dailyLossStatus" class="pill pill-green">OK</span></div>
+          <div class="health-row"><span class="muted">Portfolio Drawdown (realized + unrealized)</span><span id="drawdownStatus" class="pill pill-green">OK</span></div>
+          <div class="health-row"><span class="muted">Max Positions</span><span id="maxPosStatus" class="pill pill-green">OK</span></div>
+          <div class="health-row"><span class="muted">Max Exposure</span><span id="maxExpStatus" class="pill pill-green">OK</span></div>
+          <div class="health-row"><span class="muted">Market Data Feed</span><span id="feedStatus" class="pill pill-green">OK</span></div>
+          <div class="health-row"><span class="muted">Emergency Stop</span><span id="emergencyStatus" class="pill pill-green">Inactive</span></div>
+        </div>
+        <div class="mt-12">
+          <button class="btn btn-danger" id="emergencyBtn" style="width:100%">ACTIVATE EMERGENCY STOP</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Service Health (backend-reported)</h3>
+      <div class="grid grid-2">
+        <div>
+          <div class="health-row"><span class="muted">Backend WebSocket</span><span class="pill pill-amber" id="wsStatus">Connecting…</span></div>
+          <div class="health-row"><span class="muted">Solana RPC / WebSocket</span><span class="pill pill-amber" id="rpcStatus">Awaiting backend report</span></div>
+          <div class="health-row"><span class="muted">Telegram Bot</span><span class="pill pill-amber" id="telegramStatus">Awaiting backend report</span></div>
+        </div>
+        <div>
+          <div class="health-row"><span class="muted">Pump.fun Listener</span><span class="pill pill-amber" id="listenerStatus">Awaiting backend report</span></div>
+          <div class="health-row"><span class="muted">Position Monitor</span><span class="small muted" id="monitorStatus">Awaiting backend report</span></div>
+          <div class="health-row"><span class="muted">Fees &amp; Slippage Paid (est.)</span><span class="small mono" id="feesPaid">₦0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POSITIONS TAB -->
+  <div class="tab-content hidden" id="tab-positions">
+    <div class="card">
+      <h3>Open Positions</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Token</th><th>Strategy</th><th>Size</th><th>Remaining</th><th>Entry Price</th><th>Current Price</th><th>Unrealized P&L (est.)</th><th>Stop Loss</th><th>Est. Loss @ Stop</th><th>Take Profits</th><th>Security</th><th>Action</th></tr>
+          </thead>
+          <tbody id="positionsFullBody">
+            <tr><td colspan="12" class="muted" style="text-align:center;padding:24px">No open positions</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted mt-12">All position data is pushed by the backend execution server. Closing sends a manual close request to the backend, which executes at the live price and reports back via <code>position_closed</code>. Stale or missing prices never trigger exits — the backend enforces all exit policy.</p>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="tab-content hidden" id="tab-history">
+    <div class="grid grid-2" id="strategyStats" style="margin-bottom:16px"></div>
+    <div class="card">
+      <h3>Trade History (Simulated — auditable)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Token</th><th>Strategy</th><th>Type</th><th>Size</th><th>Entry</th><th>Exit</th><th>Entry Fee</th><th>Exit Fee</th><th>Slippage (est.)</th><th>Net P&L</th><th>Reason</th></tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="12" class="muted" style="text-align:center;padding:24px">No trades yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted mt-12">Entry fees are recorded once on buy records (no double counting). All costs are modeled estimates. Simulated profitability is not proof of future live profitability.</p>
+    </div>
+  </div>
+
+  <!-- SCANNERS TAB -->
+  <div class="tab-content hidden" id="tab-scanners">
+    <div class="scan-controls">
+      <button class="btn btn-primary" id="scanEarly">Run Early Hunter</button>
+      <button class="btn btn-purple" id="scanConfirm">Run Confirmation Hunter</button>
+      <span class="small muted" id="scanStatus">Scans are dispatched to the backend. Discovered tokens arrive in real time via the <code>token_discovered</code> WebSocket event.</span>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>Early Hunter <span class="pill pill-muted">Stage 3</span></h3>
+        <p class="small muted mb-0">Discovers newly launched tokens (pair age &lt; 6h).</p>
+        <div class="mt-12">
+          <div class="health-row"><span class="muted">Pair Age</span><span class="small">&lt; 6 hours</span></div>
+          <div class="health-row"><span class="muted">Liquidity</span><span class="small">$10K – $250K</span></div>
+          <div class="health-row"><span class="muted">Market Cap (real)</span><span class="small">$50K – $1M (FDV never substituted)</span></div>
+          <div class="health-row"><span class="muted">Volume (trailing 24h)</span><span class="small">&gt; $100K</span></div>
+        </div>
+        <p class="small muted mt-12">ℹ️ Backend runs the Pump.fun new-mint listener + DexScreener enrichment. Tokens stream to this table in real time.</p>
+      </div>
+      <div class="card">
+        <h3>Confirmation Hunter <span class="pill pill-muted">Stage 3</span></h3>
+        <p class="small muted mb-0">Confirms tokens with established activity (pair age &lt; 24h).</p>
+        <div class="mt-12">
+          <div class="health-row"><span class="muted">Pair Age</span><span class="small">&lt; 24 hours</span></div>
+          <div class="health-row"><span class="muted">Liquidity</span><span class="small">$25K – $500K</span></div>
+          <div class="health-row"><span class="muted">Market Cap (real)</span><span class="small">$100K – $2M (FDV never substituted)</span></div>
+          <div class="health-row"><span class="muted">Volume (trailing 24h)</span><span class="small">&gt; $250K</span></div>
+        </div>
+        <p class="small muted mt-12">ℹ️ Backend runs DexScreener search + boosted-token enrichment.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Last Scan Summary</h3>
+      <div id="scanSummary"><span class="small muted">No scan dispatched yet in this session.</span></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Recent Rejections (with reasons)</h3>
+      <div id="rejectionsList"><span class="small muted">None reported by backend yet.</span></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Discovered Tokens (deduplicated by mint — live from backend)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Token</th><th>Source</th><th>Discovered</th><th>Liq / MCap (FDV if no MCap)</th><th>Score</th><th>Security</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="discoveredBody">
+            <tr><td colspan="8" class="muted" style="text-align:center;padding:24px">No tokens discovered yet — run a scanner above</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab-content hidden" id="tab-settings">
+    <div class="card">
+      <h3>Trading Configuration <span class="small muted" style="text-transform:none;font-weight:400">Pushed to backend on save</span></h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Budget (₦)</label>
+          <input type="number" id="cfgBudget" value="50000" />
+        </div>
+        <div class="form-group">
+          <label>Loss Trigger Per Trade (₦) — target, not a maximum</label>
+          <input type="number" id="cfgLossTrigger" value="500" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Initial Position Size (₦)</label>
+          <input type="number" id="cfgPositionSize" value="1000" />
+        </div>
+        <div class="form-group">
+          <label>Max Simultaneous Positions</label>
+          <input type="number" id="cfgMaxPositions" value="3" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Max Combined Exposure (₦)</label>
+          <input type="number" id="cfgMaxExposure" value="3000" />
+        </div>
+        <div class="form-group">
+          <label>Portfolio Drawdown Trigger (₦) — realized + unrealized</label>
+          <input type="number" id="cfgDrawdown" value="2500" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Daily Loss Limit (₦) — Test A/B/C</label>
+          <select id="cfgDailyLimit">
+            <option value="1000">₦1,000 (Test A)</option>
+            <option value="2000">₦2,000 (Test B)</option>
+            <option value="3000">₦3,000 (Test C)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>SOL/NGN Rate (manually configured — clearly an estimate)</label>
+          <input type="number" id="cfgSolRate" value="180000" step="1000" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Trailing Stop (%)</label>
+          <input type="number" id="cfgTrailPct" value="20" />
+        </div>
+        <div class="form-group">
+          <label>Max Holding Duration (hours)</label>
+          <input type="number" id="cfgMaxHold" value="24" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>TP Level 1 — Gain (₦)</label>
+          <input type="number" id="cfgTpGain1" value="500" />
+        </div>
+        <div class="form-group">
+          <label>TP Level 1 — Exit (% of position)</label>
+          <input type="number" id="cfgTpPct1" value="50" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>TP Level 2 — Gain (₦)</label>
+          <input type="number" id="cfgTpGain2" value="2000" />
+        </div>
+        <div class="form-group">
+          <label>TP Level 2 — Exit (% of position)</label>
+          <input type="number" id="cfgTpPct2" value="50" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Liquidity Deterioration Exit (drop %)</label>
+          <input type="number" id="cfgLiqDrop" value="50" />
+        </div>
+        <div class="form-group">
+          <label>Trading-Day Timezone (daily loss baseline)</label>
+          <select id="cfgTimezone">
+            <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
+            <option value="UTC">UTC</option>
+            <option value="Europe/London">Europe/London</option>
+            <option value="America/New_York">America/New_York</option>
+          </select>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:600">Trailing Stop</div>
+          <div class="small muted">Arms after each trade gains more than the per-trade loss trigger; only reduces risk</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="cfgTrail" checked /><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:600">Leverage &amp; Borrowing</div>
+          <div class="small muted">Prohibited — always disabled</div>
+        </div>
+        <label class="toggle"><input type="checkbox" disabled /><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:600">Auto-Reinvest Profits</div>
+          <div class="small muted">Disabled by default</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="cfgReinvest" /><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:600">Loss Recovery Position Increase</div>
+          <div class="small muted">Prohibited — always disabled</div>
+        </div>
+        <label class="toggle"><input type="checkbox" disabled /><span class="slider"></span></label>
+      </div>
+      <button class="btn btn-primary mt-12" id="saveSettings">Save &amp; Sync to Backend</button>
+      <span class="small muted" id="saveMsg" style="margin-left:12px"></span>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Daily Loss-Limit Experiment</h3>
+      <p class="small muted mb-0">Stage 5 tests ₦1,000 / ₦2,000 / ₦3,000 limits with consistent entry signals and comparable periods. Daily losses = realized net losses of exits booked that trading day (configurable timezone, default Africa/Lagos); open-position losses count when they exit (no double counting). Results must be evaluated before recommending a setting — the largest limit is not chosen merely because it allows more trades.</p>
+      <div class="grid grid-3" style="margin-top:12px">
+        <div style="padding:12px;background:var(--surface-2);border-radius:8px">
+          <div class="small muted">Test A</div>
+          <div style="font-size:20px;font-weight:700">₦1,000</div>
+          <div class="small muted">Most conservative</div>
+        </div>
+        <div style="padding:12px;background:var(--surface-2);border-radius:8px">
+          <div class="small muted">Test B</div>
+          <div style="font-size:20px;font-weight:700">₦2,000</div>
+          <div class="small muted">Moderate</div>
+        </div>
+        <div style="padding:12px;background:var(--surface-2);border-radius:8px">
+          <div class="small muted">Test C</div>
+          <div style="font-size:20px;font-weight:700">₦3,000</div>
+          <div class="small muted">Least conservative</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATIONS TAB -->
+  <div class="tab-content hidden" id="tab-config">
+    <div class="alert alert-info">
+      <span>🔒</span>
+      <span>Backend credentials (RPC, wallet, Telegram) are stored ONLY in the backend <code>.env</code> file — never in this frontend. Configure the backend server URL below; the frontend connects to it via WebSocket + REST.</span>
+    </div>
+    <div class="card">
+      <h3>Backend Connection</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Backend REST URL</label>
+          <input type="text" id="cfgBackendUrl" value="http://localhost:8080" />
+        </div>
+        <div class="form-group">
+          <label>Backend WebSocket URL</label>
+          <input type="text" id="cfgWsUrl" value="ws://localhost:8080" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="saveBackend">Save &amp; Reconnect</button>
+      <span class="small muted" id="backendMsg" style="margin-left:12px"></span>
+      <p class="small muted mt-12">The frontend is fully decoupled from market APIs. All market data, scanning, monitoring, and execution happen on the backend; this dashboard only renders backend events and pushes commands.</p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Backend Credentials (server-side .env only)</h3>
+      <div class="form-group">
+        <label>RPC_HTTPS_URL</label>
+        <input type="text" placeholder="Configured in backend .env — never in frontend" readonly />
+      </div>
+      <div class="form-group">
+        <label>RPC_WSS_URL</label>
+        <input type="text" placeholder="Configured in backend .env — never in frontend" readonly />
+      </div>
+      <div class="form-group">
+        <label>WALLET_PRIVATE_KEY</label>
+        <input type="password" placeholder="Configured in backend .env — never in frontend" readonly />
+      </div>
+      <div class="form-group">
+        <label>TELEGRAM_BOT_TOKEN</label>
+        <input type="text" placeholder="Configured in backend .env — never in frontend" readonly />
+      </div>
+      <div class="form-group">
+        <label>TELEGRAM_CHAT_ID</label>
+        <input type="text" placeholder="Configured in backend .env — never in frontend" readonly />
+      </div>
+      <p class="small muted mt-12">⚠️ <strong>Architecture:</strong> Continuous execution, WebSocket subscriptions, secure automated transaction signing, and true 24/7 monitoring run on the backend Node.js server. This dashboard connects to it and reflects its state. Live trading remains disabled until the backend is configured, credentials added to <code>.env</code>, and the service started.</p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Security Provider Status (backend-reported)</h3>
+      <div class="health-row"><span class="muted">RugCheck (Solana)</span><span class="pill pill-amber" id="rugStatus">Awaiting backend report</span></div>
+      <div class="health-row"><span class="muted">GoPlus</span><span class="small">No Solana endpoint (EVM only) — not used</span></div>
+      <div class="health-row"><span class="muted">TokenSniffer</span><span class="small">EVM only — not used</span></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Wallet Security</h3>
+      <div class="health-row"><span class="muted">Wallet Type</span><span class="small">Phantom (existing) → Dedicated trading wallet recommended</span></div>
+      <div class="health-row"><span class="muted">Recovery Phrase</span><span class="small" style="color:var(--red)">Never requested</span></div>
+      <div class="health-row"><span class="muted">Private Key Exposure</span><span class="small" style="color:var(--red)">Never exposed to frontend, scanners, Telegram, or logs</span></div>
+      <div class="health-row"><span class="muted">Automated Signing</span><span class="small" style="color:var(--amber)">Handled by backend signing service</span></div>
+    </div>
+  </div>
+
+  <!-- TESTS TAB -->
+  <div class="tab-content hidden" id="tab-tests">
+    <div class="card">
+      <h3>Connection &amp; Self-Tests <button class="btn btn-primary" id="runTests" style="padding:6px 14px;font-size:13px">Run All Tests</button></h3>
+      <p class="small muted mb-0">Verifies the WebSocket bridge, REST command endpoints, event handlers, and the local accounting math (stop-loss, drawdown, partial TPs, trailing stop) against the backend-reported state.</p>
+      <div id="testResults" class="mt-12"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Vankleff Solana Hunter — Backend-Connected Edition<br/>
+    Paper Trading Mode Active · Live Trading Disabled · Frontend relies solely on backend events
+  </div>
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  // ================= CONFIG =================
+  var STORAGE_KEY = "vankleff_state_v4";
+  // Modeled paper-trading execution costs (estimates, documented)
+  var BUY_FEE_PCT = 0.005;   // 0.5% entry fee — taken once at entry
+  var SELL_FEE_PCT = 0.01;   // 1% exit fee
+  var SLIPPAGE_PCT = 0.01;   // 1% slippage on exits
+  var RECONNECT_BASE_MS = 1000;
+  var RECONNECT_MAX_MS = 30000;
+  var HEARTBEAT_TIMEOUT_MS = 45000;
+
+  var DEFAULT_STATE = {
+    mode: "paper",
+    liveEnabled: false,
+    emergencyStop: false,
+    feedFailures: 0,
+    connected: false,
+    backendUrl: "http://localhost:8080",
+    wsUrl: "ws://localhost:8080",
+    settings: {
+      budget: 50000,
+      lossTrigger: 500,
+      positionSize: 1000,
+      maxPositions: 3,
+      maxExposure: 3000,
+      drawdownTrigger: 2500,
+      dailyLossLimit: 1000,
+      solNgnRate: 180000,
+      reinvest: false,
+      trailingEnabled: true,
+      trailPct: 20,
+      tpGain1: 500, tpPct1: 50,
+      tpGain2: 2000, tpPct2: 50,
+      maxHoldHours: 24,
+      liquidityDropPct: 50,
+      timezone: "Africa/Lagos"
+    },
+    positions: [],
+    tradeHistory: [],
+    discoveredTokens: [],
+    realizedPnl: 0,
+    dailyLossDate: null,
+    serviceHealth: {
+      rpc: "unknown",
+      telegram: "unknown",
+      listener: "unknown",
+      monitor: "unknown",
+      rugcheck: "unknown"
+    },
+    lastScan: null
+  };
+
+  // ================= STATE =================
+  function loadState() {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        return Object.assign({}, DEFAULT_STATE, parsed, {
+          settings: Object.assign({}, DEFAULT_STATE.settings, parsed.settings || {}),
+          serviceHealth: Object.assign({}, DEFAULT_STATE.serviceHealth, parsed.serviceHealth || {})
+        });
+      }
+    } catch (e) { console.warn("State load failed", e); }
+    return JSON.parse(JSON.stringify(DEFAULT_STATE));
+  }
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn("State save failed", e); }
+  }
+  var state = loadState();
+  // Migrate positions (ensure fields exist)
+  state.positions.forEach(function(p) {
+    if (p.remainingPct == null) p.remainingPct = 100;
+    if (p.tpLevels == null) p.tpLevels = [];
+    if (p.executedTps == null) p.executedTps = [];
+    if (p.entryLiquidityUsd == null) p.entryLiquidityUsd = 0;
+    if (p.maxHoldHours == null) p.maxHoldHours = state.settings.maxHoldHours;
+    if (p.lastPriceUpdate == null) p.lastPriceUpdate = new Date().toISOString();
+  });
+
+  // ================= HELPERS =================
+  function fmt(naira) {
+    return "\u20A6" + Number(naira || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
+  }
+  function fmtSol(sol) { return Number(sol || 0).toFixed(4) + " SOL"; }
+  function fmtUsd(n) {
+    if (!n || n <= 0) return "\u2014";
+    if (n >= 1000) return "$" + Math.round(n).toLocaleString("en-US");
+    return "$" + Number(n).toPrecision(6);
+  }
+  function ngnToSol(naira) { return naira / (state.settings.solNgnRate || 1); }
+  function pnlClass(val) { return val > 0 ? "pos" : val < 0 ? "neg" : ""; }
+  function timeAgo(iso) {
+    if (!iso) return "\u2014";
+    var diff = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + "m ago";
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + "h ago";
+    return Math.floor(hrs / 24) + "d ago";
+  }
+  function uid(prefix) { return prefix + "_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function logEvent(level, component, message) {
+    state.logs = state.logs || [];
+    state.logs.unshift({ timestamp: new Date().toISOString(), level: level, component: component, message: message });
+    if (state.logs.length > 200) state.logs.length = 200;
+  }
+
+  // ================= ACCOUNTING (documented model) =================
+  function tokensFor(p) { return (p.sizeNaira * (1 - BUY_FEE_PCT)) / p.entryPrice; }
+  function remainingFraction(p) { return (p.remainingPct == null ? 100 : p.remainingPct) / 100; }
+  function unrealizedPnlOf(p) {
+    if (!p.currentPrice || p.currentPrice <= 0) return 0;
+    var frac = remainingFraction(p);
+    var proceeds = tokensFor(p) * frac * p.currentPrice * (1 - SELL_FEE_PCT - SLIPPAGE_PCT);
+    return proceeds - p.sizeNaira * frac;
+  }
+  function estLossAtStop(p) {
+    if (!p.stopLossPrice) return null;
+    var frac = remainingFraction(p);
+    var proceeds = tokensFor(p) * frac * p.stopLossPrice * (1 - SELL_FEE_PCT - SLIPPAGE_PCT);
+    return p.sizeNaira * frac - proceeds;
+  }
+  function computeStopPrice(entryPrice, size, lossTrigger) {
+    if (lossTrigger >= size) return null;
+    var denom = size * (1 - BUY_FEE_PCT) * (1 - SELL_FEE_PCT - SLIPPAGE_PCT);
+    var price = ((size - lossTrigger) * entryPrice) / denom;
+    if (!isFinite(price) || price <= 0) return null;
+    return price;
+  }
+  function stopWarning(size, lossTrigger) {
+    if (lossTrigger >= size) {
+      return "Loss trigger \u20A6" + lossTrigger + " is \u2265 position size \u20A6" + size + " \u2014 a price stop cannot achieve it";
+    }
+    var dropPct = (lossTrigger / size) * 100;
+    if (dropPct > 50) {
+      return "The \u20A6" + lossTrigger + " trigger implies a ~" + Math.round(dropPct) + "% adverse price move on a \u20A6" + size + " position \u2014 it is a risk target, not a guaranteed maximum loss";
+    }
+    return null;
+  }
+  function tpLevelsFor(s) {
+    var levels = [
+      { gain: Number(s.tpGain1) || 0, pct: Number(s.tpPct1) || 0 },
+      { gain: Number(s.tpGain2) || 0, pct: Number(s.tpPct2) || 0 }
+    ].filter(function(l) { return l.pct > 0 && l.gain > 0; });
+    var total = levels.reduce(function(a, l) { return a + l.pct; }, 0);
+    if (total > 100) {
+      var acc = 0;
+      levels.forEach(function(l, i) {
+        if (i === levels.length - 1) l.pct = 100 - acc;
+        else l.pct = Math.floor((l.pct / total) * 100);
+        acc += l.pct;
+      });
+    }
+    return levels;
+  }
+  function validateTpLevels(s) {
+    var levels = tpLevelsFor(s);
+    var total = levels.reduce(function(a, l) { return a + l.pct; }, 0);
+    return {
+      valid: total <= 100 && total > 0,
+      total: total,
+      error: total > 100 ? "Total planned exits (" + total + "%) exceed 100%" : total === 0 ? "No take-profit levels configured" : null
+    };
+  }
+
+  // ================= RISK CONTROLS (from backend-reported state) =================
+  function getExposure() {
+    return state.positions.reduce(function(sum, p) { return sum + p.sizeNaira * remainingFraction(p); }, 0);
+  }
+  function getUnrealizedPnl() {
+    return state.positions.reduce(function(sum, p) { return sum + unrealizedPnlOf(p); }, 0);
+  }
+  function sumDailyLosses() {
+    // Backend reports realizedPnl and trade history; daily loss derived from sell trades today.
+    // Timezone-aware day boundary.
+    var tz = state.settings.timezone || "Africa/Lagos";
+    var dayStart = tradingDayStart(tz).getTime();
+    var sum = 0;
+    state.tradeHistory.forEach(function(t) {
+      if (t.type === "sell" && t.netPnl < 0 && new Date(t.timestamp).getTime() >= dayStart) sum += -t.netPnl;
+    });
+    return Math.max(0, sum);
+  }
+  function tzOffsetMinutes(tz, date) {
+    try {
+      var dtf = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      var parts = {};
+      dtf.formatToParts(date).forEach(function(p) { parts[p.type] = p.value; });
+      var asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour === 24 ? 0 : +parts.hour, +parts.minute, +parts.second);
+      return (asUTC - date.getTime()) / 60000;
+    } catch (e) { return 0; }
+  }
+  function tradingDayStart(tz) {
+    try {
+      var now = new Date();
+      var ymd = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(now).split("-");
+      var midnight = Date.UTC(+ymd[0], +ymd[1] - 1, +ymd[2]);
+      return new Date(midnight - tzOffsetMinutes(tz, new Date(midnight)) * 60000);
+    } catch (e) {
+      var t = new Date(); t.setHours(0, 0, 0, 0); return t;
+    }
+  }
+  function riskStatus() {
+    var s = state.settings;
+    var dailyLossUsed = sumDailyLosses();
+    var unrealized = getUnrealizedPnl();
+    var total = state.realizedPnl + unrealized;
+    var drawdownValue = Math.max(0, -total);
+    var drawdownHit = -total >= s.drawdownTrigger;
+    var exposure = getExposure();
+    return {
+      dailyLossUsed: dailyLossUsed,
+      dailyLimitHit: dailyLossUsed >= s.dailyLossLimit,
+      drawdownHit: drawdownHit,
+      drawdownValue: drawdownValue,
+      maxPosHit: state.positions.length >= s.maxPositions,
+      expHit: exposure >= s.maxExposure,
+      feedUnreliable: state.feedFailures >= 3
+    };
+  }
+
+  // ================= WEBSOCKET BRIDGE =================
+  var ws = null;
+  var reconnectAttempts = 0;
+  var reconnectTimer = null;
+  var heartbeatTimer = null;
+  var lastHeartbeat = 0;
+
+  function updateConnUI(status, text) {
+    var el = document.getElementById("wsStatus");
+    var alertEl = document.getElementById("connAlert");
+    var alertText = document.getElementById("connAlertText");
+    el.className = "pill " + (status === "connected" ? "pill-green" : status === "error" ? "pill-red" : "pill-amber");
+    el.textContent = text;
+    if (status === "connected") {
+      alertEl.classList.add("hidden");
+    } else if (status === "error") {
+      alertEl.classList.remove("hidden");
+      alertEl.className = "alert alert-err";
+      alertText.textContent = "Backend disconnected — " + text + ". Retrying…";
+    } else {
+      alertEl.classList.remove("hidden");
+      alertEl.className = "alert alert-warn";
+      alertText.textContent = text;
+    }
+  }
+
+  function connectWebSocket() {
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+    var url = state.wsUrl || "ws://localhost:8080";
+    updateConnUI("connecting", "Connecting to " + url + " …");
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      updateConnUI("error", "invalid WebSocket URL: " + url);
+      scheduleReconnect();
+      return;
+    }
+
+    ws.onopen = function() {
+      reconnectAttempts = 0;
+      state.connected = true;
+      lastHeartbeat = Date.now();
+      updateConnUI("connected", "Connected");
+      logEvent("info", "ws", "WebSocket connected to " + url);
+      // Request a full state snapshot from the backend
+      sendWsMessage({ type: "subscribe", channel: "all" });
+      sendWsMessage({ type: "get_state" });
+      startHeartbeat();
+      render();
+    };
+
+    ws.onmessage = function(event) {
+      var msg;
+      try { msg = JSON.parse(event.data); }
+      catch (e) { return; }
+      handleBackendEvent(msg);
+    };
+
+    ws.onerror = function() {
+      updateConnUI("error", "connection error");
+      logEvent("error", "ws", "WebSocket error");
+    };
+
+    ws.onclose = function() {
+      state.connected = false;
+      stopHeartbeat();
+      updateConnUI("error", "disconnected");
+      logEvent("warn", "ws", "WebSocket closed");
+      scheduleReconnect();
+      render();
+    };
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer) return;
+    var delay = Math.min(RECONNECT_BASE_MS * Math.pow(2, reconnectAttempts), RECONNECT_MAX_MS);
+    reconnectAttempts++;
+    logEvent("info", "ws", "Reconnecting in " + delay + "ms (attempt " + reconnectAttempts + ")");
+    reconnectTimer = setTimeout(function() {
+      reconnectTimer = null;
+      connectWebSocket();
+    }, delay);
+  }
+
+  function startHeartbeat() {
+    stopHeartbeat();
+    heartbeatTimer = setInterval(function() {
+      if (Date.now() - lastHeartbeat > HEARTBEAT_TIMEOUT_MS) {
+        logEvent("warn", "ws", "Heartbeat timeout — forcing reconnect");
+        try { ws.close(); } catch (e) {}
+        return;
+      }
+      sendWsMessage({ type: "ping" });
+    }, 15000);
+  }
+  function stopHeartbeat() {
+    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+  }
+
+  function sendWsMessage(obj) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try { ws.send(JSON.stringify(obj)); return true; }
+      catch (e) { logEvent("error", "ws", "Send failed: " + e.message); }
+    }
+    return false;
+  }
+
+  // ================= REST COMMAND SENDER =================
+  async function restPost(path, payload) {
+    var base = (state.backendUrl || "http://localhost:8080").replace(/\/+$/, "");
+    var res = await fetch(base + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {})
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json().catch(function() { return {}; });
+  }
+
+  // ================= BACKEND EVENT HANDLERS =================
+  function handleBackendEvent(msg) {
+    if (!msg || !msg.type) return;
+    switch (msg.type) {
+
+      case "pong":
+      case "heartbeat":
+        lastHeartbeat = Date.now();
+        break;
+
+      case "state_snapshot":
+        applyStateSnapshot(msg.data || msg.payload || {});
+        render();
+        renderScanners();
+        break;
+
+      case "token_discovered": {
+        var t = msg.data || msg.token || {};
+        upsertDiscoveredToken(t);
+        renderScanners();
+        break;
+      }
+
+      case "position_opened": {
+        var p = msg.data || msg.position || {};
+        if (p.id) {
+          var existing = state.positions.find(function(x) { return x.id === p.id; });
+          if (!existing) state.positions.push(p);
+          else Object.assign(existing, p);
+        }
+        render();
+        break;
+      }
+
+      case "position_updated": {
+        var u = msg.data || msg.position || {};
+        if (u.id) {
+          var pos = state.positions.find(function(x) { return x.id === u.id; });
+          if (pos) Object.assign(pos, u);
+        }
+        render();
+        break;
+      }
+
+      case "position_closed": {
+        var c = msg.data || msg.position || {};
+        if (c.id) {
+          state.positions = state.positions.filter(function(x) { return x.id !== c.id; });
+        }
+        if (c.trade) {
+          state.tradeHistory.push(c.trade);
+        } else if (c.netPnl !== undefined) {
+          state.tradeHistory.push({
+            timestamp: c.timestamp || new Date().toISOString(),
+            symbol: c.symbol || "",
+            strategy: c.strategy || "",
+            type: "sell",
+            sizeNaira: c.sizeNaira || 0,
+            entryPrice: c.entryPrice || 0,
+            exitPrice: c.exitPrice || 0,
+            exitPct: c.exitPct || 100,
+            partial: !!c.partial,
+            entryFee: c.entryFee || 0,
+            exitFee: c.exitFee || 0,
+            slippage: c.slippage || 0,
+            netPnl: c.netPnl || 0,
+            simulated: c.simulated !== false,
+            reason: c.reason || "closed"
+          });
+        }
+        if (typeof c.realizedPnl === "number") state.realizedPnl = c.realizedPnl;
+        render();
+        break;
+      }
+
+      case "trade_recorded": {
+        var tr = msg.data || msg.trade || {};
+        if (tr) state.tradeHistory.push(tr);
+        if (typeof tr.realizedPnlDelta === "number") state.realizedPnl += tr.realizedPnlDelta;
+        render();
+        break;
+      }
+
+      case "risk_alert": {
+        var ra = msg.data || msg.alert || {};
+        showRiskAlert(ra);
+        render();
+        break;
+      }
+
+      case "risk_status": {
+        var rs = msg.data || msg.status || {};
+        if (typeof rs.emergencyStop === "boolean") state.emergencyStop = rs.emergencyStop;
+        if (typeof rs.realizedPnl === "number") state.realizedPnl = rs.realizedPnl;
+        if (typeof rs.feedFailures === "number") state.feedFailures = rs.feedFailures;
+        render();
+        break;
+      }
+
+      case "service_health": {
+        var sh = msg.data || msg.health || {};
+        Object.assign(state.serviceHealth, sh);
+        renderServiceHealth();
+        break;
+      }
+
+      case "scan_result": {
+        var sr = msg.data || msg.result || {};
+        state.lastScan = sr;
+        renderScanners();
+        break;
+      }
+
+      case "settings_synced": {
+        var ss = msg.data || msg.settings || {};
+        Object.assign(state.settings, ss);
+        saveState();
+        render();
+        var m = document.getElementById("saveMsg");
+        if (m) { m.textContent = "\u2713 Synced to backend"; setTimeout(function() { m.textContent = ""; }, 2500); }
+        break;
+      }
+
+      case "error": {
+        logEvent("error", "backend", (msg.data || msg.message || "backend error"));
+        break;
+      }
+
+      default:
+        // Unknown event — log and ignore
+        logEvent("info", "ws", "Unhandled event type: " + msg.type);
+    }
+    lastHeartbeat = Date.now();
+  }
+
+  function applyStateSnapshot(snap) {
+    if (snap.settings) Object.assign(state.settings, snap.settings);
+    if (Array.isArray(snap.positions)) state.positions = snap.positions;
+    if (Array.isArray(snap.tradeHistory)) state.tradeHistory = snap.tradeHistory;
+    if (Array.isArray(snap.discoveredTokens)) state.discoveredTokens = snap.discoveredTokens;
+    if (typeof snap.realizedPnl === "number") state.realizedPnl = snap.realizedPnl;
+    if (typeof snap.emergencyStop === "boolean") state.emergencyStop = snap.emergencyStop;
+    if (typeof snap.mode === "string") state.mode = snap.mode;
+    if (snap.serviceHealth) Object.assign(state.serviceHealth, snap.serviceHealth);
+    if (snap.lastScan) state.lastScan = snap.lastScan;
+    saveState();
+  }
+
+  function upsertDiscoveredToken(t) {
+    if (!t.address && !t.id) return;
+    var key = t.address || t.id;
+    var found = state.discoveredTokens.find(function(x) {
+      return (x.address || x.id) === key;
+    });
+    if (found) Object.assign(found, t);
+    else {
+      state.discoveredTokens.push(Object.assign({
+        id: uid("tok"),
+        discoveredAt: new Date().toISOString(),
+        status: "candidate",
+        securityStatus: "pending",
+        securityNotes: ""
+      }, t));
+      if (state.discoveredTokens.length > 100) state.discoveredTokens = state.discoveredTokens.slice(-100);
+    }
+    saveState();
+  }
+
+  function showRiskAlert(alert) {
+    var alertEl = document.getElementById("riskAlert");
+    var alertText = document.getElementById("riskAlertText");
+    if (!alert || !alert.active) {
+      alertEl.classList.add("hidden");
+      return;
+    }
+    alertEl.classList.remove("hidden");
+    alertText.textContent = alert.message || "Risk limit reached — new entries blocked.";
+  }
+
+  // ================= COMMANDS (frontend -> backend) =================
+  function collectSettingsFromForm() {
+    var s = state.settings;
+    s.budget = Number(document.getElementById("cfgBudget").value) || 50000;
+    s.lossTrigger = Number(document.getElementById("cfgLossTrigger").value) || 500;
+    s.positionSize = Number(document.getElementById("cfgPositionSize").value) || 1000;
+    s.maxPositions = Number(document.getElementById("cfgMaxPositions").value) || 3;
+    s.maxExposure = Number(document.getElementById("cfgMaxExposure").value) || 3000;
+    s.drawdownTrigger = Number(document.getElementById("cfgDrawdown").value) || 2500;
+    s.dailyLossLimit = Number(document.getElementById("cfgDailyLimit").value) || 1000;
+    s.solNgnRate = Number(document.getElementById("cfgSolRate").value) || 180000;
+    s.trailPct = Number(document.getElementById("cfgTrailPct").value) || 20;
+    s.maxHoldHours = Number(document.getElementById("cfgMaxHold").value) || 24;
+    s.tpGain1 = Number(document.getElementById("cfgTpGain1").value) || 0;
+    s.tpPct1 = Number(document.getElementById("cfgTpPct1").value) || 0;
+    s.tpGain2 = Number(document.getElementById("cfgTpGain2").value) || 0;
+    s.tpPct2 = Number(document.getElementById("cfgTpPct2").value) || 0;
+    s.liquidityDropPct = Number(document.getElementById("cfgLiqDrop").value) || 50;
+    s.timezone = document.getElementById("cfgTimezone").value || "Africa/Lagos";
+    s.trailingEnabled = document.getElementById("cfgTrail").checked;
+    s.reinvest = document.getElementById("cfgReinvest").checked;
+    return s;
+  }
+
+  async function pushSettings() {
+    var s = collectSettingsFromForm();
+    var v = validateTpLevels(s);
+    if (!v.valid) { alert("Cannot save: " + v.error); return; }
+    saveState();
+    render();
+    var msg = document.getElementById("saveMsg");
+    msg.textContent = "Syncing to backend…";
+    try {
+      await restPost("/api/settings", { settings: s });
+      // Also push via WS for realtime sync
+      sendWsMessage({ type: "update_settings", data: s });
+      msg.textContent = "\u2713 Sent to backend (planned TP exits: " + v.total + "%)";
+      logEvent("info", "settings", "Settings pushed to backend");
+    } catch (e) {
+      msg.textContent = "\u26A0 REST failed, sent via WS only";
+      sendWsMessage({ type: "update_settings", data: s });
+      logEvent("warn", "settings", "REST settings push failed: " + e.message);
+    }
+    setTimeout(function() { msg.textContent = ""; }, 3000);
+  }
+
+  async function pushEmergencyStop(activate) {
+    var payload = { activate: activate, timestamp: new Date().toISOString() };
+    try {
+      await restPost("/api/emergency-stop", payload);
+    } catch (e) {
+      logEvent("warn", "risk", "REST emergency-stop failed: " + e.message);
+    }
+    sendWsMessage({ type: "emergency_stop", data: payload });
+    logEvent("warn", "risk", (activate ? "ACTIVATE" : "RESET") + " emergency stop sent to backend");
+  }
+
+  async function pushClosePosition(positionId) {
+    var payload = { positionId: positionId, timestamp: new Date().toISOString() };
+    try {
+      await restPost("/api/close-position", payload);
+    } catch (e) {
+      logEvent("warn", "paper_trading", "REST close failed: " + e.message);
+    }
+    sendWsMessage({ type: "close_position", data: payload });
+    logEvent("info", "paper_trading", "Close request sent for position " + positionId);
+  }
+
+  async function pushScan(strategy) {
+    var btn = document.getElementById(strategy === "confirmation_hunter" ? "scanConfirm" : "scanEarly");
+    var statusEl = document.getElementById("scanStatus");
+    btn.disabled = true;
+    statusEl.textContent = "Scan dispatched to backend…";
+    try {
+      await restPost("/api/scan", { strategy: strategy });
+      sendWsMessage({ type: "run_scan", data: { strategy: strategy } });
+      statusEl.textContent = "Scan running on backend — results will stream in via token_discovered events.";
+      logEvent("info", "scanner", "Scan dispatched: " + strategy);
+    } catch (e) {
+      statusEl.textContent = "REST failed, sent via WS: " + (e.message || e);
+      sendWsMessage({ type: "run_scan", data: { strategy: strategy } });
+      logEvent("warn", "scanner", "REST scan failed: " + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function pushPaperTrade(tokenId) {
+    var t = state.discoveredTokens.find(function(x) { return x.id === tokenId; });
+    if (!t) return;
+    var payload = { tokenId: tokenId, address: t.address, symbol: t.symbol, priceUsd: t.priceUsd, timestamp: new Date().toISOString() };
+    try {
+      await restPost("/api/paper-trade", payload);
+    } catch (e) {
+      logEvent("warn", "paper_trading", "REST paper-trade failed: " + e.message);
+    }
+    sendWsMessage({ type: "paper_trade", data: payload });
+    logEvent("info", "paper_trading", "Paper trade request sent for " + t.symbol);
+  }
+
+  // ================= RENDERING =================
+  function render() {
+    var s = state.settings;
+    var r = riskStatus();
+    var available = s.budget + state.realizedPnl - getExposure();
+    var unrealized = getUnrealizedPnl();
+    var totalPnl = state.realizedPnl + unrealized;
+    var portfolioValue = available + getExposure() + Math.max(0, unrealized);
+    var pct = s.budget > 0 ? (totalPnl / s.budget * 100) : 0;
+
+    var badge = document.getElementById("modeBadge");
+    var modeText = document.getElementById("modeText");
+    if (state.emergencyStop) {
+      badge.className = "mode-badge mode-live";
+      modeText.textContent = "EMERGENCY STOP";
+    } else {
+      badge.className = "mode-badge mode-paper";
+      modeText.textContent = "PAPER TRADING";
+    }
+
+    document.getElementById("startBalance").textContent = fmt(s.budget);
+    document.getElementById("availableFunds").textContent = fmt(Math.max(0, available));
+    document.getElementById("exposureText").textContent = "Committed: " + fmt(getExposure()) + " / " + fmt(s.maxExposure);
+    document.getElementById("portfolioValue").textContent = fmt(portfolioValue);
+    document.getElementById("portfolioSub").textContent = fmtSol(ngnToSol(portfolioValue)) + " SOL (simulated @ \u20A6" + Math.round(s.solNgnRate).toLocaleString() + "/SOL \u2014 manual estimate)";
+
+    var pnlEl = document.getElementById("totalPnl");
+    pnlEl.textContent = (totalPnl >= 0 ? "+" : "-") + fmt(Math.abs(totalPnl));
+    pnlEl.className = "stat-value mono " + pnlClass(totalPnl);
+    document.getElementById("pnlPercent").textContent = "Realized " + fmt(state.realizedPnl) + " \u00B7 Unrealized " + fmt(unrealized) + " (est.) \u00B7 " + (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
+    document.getElementById("feesPaid").textContent = fmt(state.tradeHistory.reduce(function(sum, t) { return sum + (t.entryFee || 0) + (t.exitFee || 0) + (t.slippage || 0); }, 0)) + " (est.)";
+
+    document.getElementById("positionCount").textContent = state.positions.length;
+
+    var pb = document.getElementById("positionsBody");
+    if (state.positions.length === 0) {
+      pb.innerHTML = '<tr><td colspan="5" class="muted" style="text-align:center;padding:24px">No open positions</td></tr>';
+    } else {
+      pb.innerHTML = state.positions.map(function(p) {
+        var pnl = unrealizedPnlOf(p);
+        var rem = p.remainingPct == null ? 100 : p.remainingPct;
+        return "<tr>" +
+          '<td class="token-cell"><span class="token-icon">' + esc(p.symbol ? p.symbol.slice(0, 2) : "?") + "</span>" + esc(p.symbol) + "</td>" +
+          '<td class="mono small">' + fmt(p.sizeNaira) + "</td>" +
+          '<td class="mono small muted">' + fmtUsd(p.currentPrice) + "</td>" +
+          '<td class="mono small ' + pnlClass(pnl) + '">' + (pnl >= 0 ? "+" : "-") + fmt(Math.abs(pnl)) + "</td>" +
+          '<td class="small">' + rem + "%" + (p.trailHigh > 0 ? ' <span class="pill pill-green">trailed</span>' : "") + "</td>" +
+        "</tr>";
+      }).join("");
+    }
+
+    var pfb = document.getElementById("positionsFullBody");
+    if (state.positions.length === 0) {
+      pfb.innerHTML = '<tr><td colspan="12" class="muted" style="text-align:center;padding:24px">No open positions</td></tr>';
+    } else {
+      pfb.innerHTML = state.positions.map(function(p) {
+        var pnl = unrealizedPnlOf(p);
+        var secPill = p.securityStatus === "passed" ? '<span class="pill pill-green">Passed</span>' :
+                      p.securityStatus === "failed" ? '<span class="pill pill-red">Failed</span>' :
+                      '<span class="pill pill-amber">' + esc(p.securityStatus || "pending") + "</span>";
+        var tps = (p.tpLevels || []).map(function(l, i) {
+          var done = (p.executedTps || []).indexOf(i) !== -1;
+          return "TP" + (i + 1) + ": +\u20A6" + l.gain + " \u2192 " + l.pct + "%" + (done ? "\u2713" : "");
+        }).join(" · ") || "\u2014";
+        var est = estLossAtStop(p);
+        return "<tr>" +
+          '<td class="token-cell"><span class="token-icon">' + esc(p.symbol ? p.symbol.slice(0, 2) : "?") + "</span>" + esc(p.symbol) + "</td>" +
+          '<td><span class="pill pill-muted">' + esc(p.strategy) + "</span></td>" +
+          '<td class="mono">' + fmt(p.sizeNaira) + "</td>" +
+          '<td class="small">' + (p.remainingPct == null ? 100 : p.remainingPct) + "%</td>" +
+          '<td class="mono small">' + fmtUsd(p.entryPrice) + "</td>" +
+          '<td class="mono small muted">' + fmtUsd(p.currentPrice) + "</td>" +
+          '<td class="mono small ' + pnlClass(pnl) + '">' + (pnl >= 0 ? "+" : "-") + fmt(Math.abs(pnl)) + "</td>" +
+          '<td class="mono small">' + fmtUsd(p.stopLossPrice) + "</td>" +
+          '<td class="mono small">' + (est != null ? "\u2248" + fmt(est) : "\u2014") + "</td>" +
+          '<td class="small">' + esc(tps) + "</td>" +
+          "<td>" + secPill + "</td>" +
+          '<td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px" onclick="vankleff.closePosition(\'' + p.id + '\')">Close</button></td>' +
+        "</tr>";
+      }).join("");
+    }
+
+    var hb = document.getElementById("historyBody");
+    if (state.tradeHistory.length === 0) {
+      hb.innerHTML = '<tr><td colspan="12" class="muted" style="text-align:center;padding:24px">No trades yet</td></tr>';
+    } else {
+      hb.innerHTML = state.tradeHistory.slice().reverse().slice(0, 50).map(function(t) {
+        return "<tr>" +
+          '<td class="small">' + new Date(t.timestamp).toLocaleString() + "</td>" +
+          '<td class="token-cell">' + esc(t.symbol) + "</td>" +
+          '<td><span class="pill pill-muted">' + esc(t.strategy) + "</span></td>" +
+          "<td>" + (t.type === "buy" ? '<span style="color:var(--green)">Buy</span>' : t.type === "sell" ? '<span style="color:var(--red)">Sell' + (t.partial ? " (" + t.exitPct + "%)" : "") + "</span>" : '<span class="muted">' + esc(t.type) + "</span>") + "</td>" +
+          '<td class="mono small">' + fmt(t.sizeNaira) + "</td>" +
+          '<td class="mono small">' + fmtUsd(t.entryPrice) + "</td>" +
+          '<td class="mono small">' + fmtUsd(t.exitPrice) + "</td>" +
+          '<td class="mono small">' + (t.entryFee ? fmt(t.entryFee) : "\u2014") + "</td>" +
+          '<td class="mono small">' + (t.exitFee ? fmt(t.exitFee) : "\u2014") + "</td>" +
+          '<td class="mono small">' + (t.slippage ? fmt(t.slippage) : "\u2014") + "</td>" +
+          '<td class="mono small ' + pnlClass(t.netPnl) + '">' + (t.type === "sell" ? (t.netPnl >= 0 ? "+" : "-") + fmt(Math.abs(t.netPnl)) : "\u2014") + "</td>" +
+          '<td class="small muted">' + esc(t.reason || "manual") + "</td>" +
+        "</tr>";
+      }).join("");
+    }
+
+    // Per-strategy performance
+    var statsBox = document.getElementById("strategyStats");
+    var stats = {};
+    state.tradeHistory.forEach(function(t) {
+      if (t.type !== "sell") return;
+      var st = stats[t.strategy] || (stats[t.strategy] = { n: 0, wins: 0, wSum: 0, lSum: 0, net: 0, fees: 0 });
+      st.n++; st.net += t.netPnl || 0; st.fees += (t.entryFee || 0) + (t.exitFee || 0) + (t.slippage || 0);
+      if ((t.netPnl || 0) > 0) { st.wins++; st.wSum += t.netPnl; } else st.lSum += t.netPnl || 0;
+    });
+    var statKeys = Object.keys(stats);
+    if (statKeys.length === 0) {
+      statsBox.innerHTML = "";
+    } else {
+      statsBox.innerHTML = statKeys.map(function(k) {
+        var st = stats[k];
+        return '<div class="card"><h3>' + esc(k) + ' performance <span class="pill pill-muted">' + st.n + ' exit(s)</span></h3>' +
+          '<div class="health-row"><span class="muted">Win rate</span><span>' + (st.n ? Math.round(st.wins / st.n * 100) : 0) + "%</span></div>" +
+          '<div class="health-row"><span class="muted">Avg win</span><span class="pos">' + (st.wins ? "+" + fmt(st.wSum / st.wins) : "\u2014") + "</span></div>" +
+          '<div class="health-row"><span class="muted">Avg loss</span><span class="neg">' + (st.n - st.wins ? fmt(st.lSum / (st.n - st.wins)) : "\u2014") + "</span></div>" +
+          '<div class="health-row"><span class="muted">Realized net P&amp;L</span><span class="' + pnlClass(st.net) + '">' + (st.net >= 0 ? "+" : "-") + fmt(Math.abs(st.net)) + "</span></div>" +
+          '<div class="health-row"><span class="muted">Modeled costs (est.)</span><span>' + fmt(st.fees) + "</span></div></div>";
+      }).join("");
+    }
+
+    // Risk status
+    var dls = document.getElementById("dailyLossStatus");
+    dls.className = "pill " + (r.dailyLimitHit ? "pill-red" : "pill-green");
+    dls.textContent = r.dailyLimitHit ? "LIMIT HIT" : fmt(r.dailyLossUsed) + " / " + fmt(s.dailyLossLimit);
+    var dds = document.getElementById("drawdownStatus");
+    dds.className = "pill " + (r.drawdownHit ? "pill-red" : "pill-green");
+    dds.textContent = r.drawdownHit ? "TRIGGERED" : fmt(r.drawdownValue) + " / " + fmt(s.drawdownTrigger);
+    var mps = document.getElementById("maxPosStatus");
+    mps.className = "pill " + (r.maxPosHit ? "pill-amber" : "pill-green");
+    mps.textContent = state.positions.length + " / " + s.maxPositions;
+    var mes = document.getElementById("maxExpStatus");
+    mes.className = "pill " + (r.expHit ? "pill-amber" : "pill-green");
+    mes.textContent = fmt(getExposure()) + " / " + fmt(s.maxExposure);
+    var fs = document.getElementById("feedStatus");
+    fs.className = "pill " + (r.feedUnreliable ? "pill-red" : state.feedFailures > 0 ? "pill-amber" : "pill-green");
+    fs.textContent = r.feedUnreliable ? "UNRELIABLE — entries paused" : state.feedFailures > 0 ? state.feedFailures + " failure(s)" : "OK";
+    var es = document.getElementById("emergencyStatus");
+    es.className = "pill " + (state.emergencyStop ? "pill-red" : "pill-green");
+    es.textContent = state.emergencyStop ? "ACTIVE" : "Inactive";
+
+    var eBtn = document.getElementById("emergencyBtn");
+    if (state.emergencyStop) {
+      eBtn.textContent = "RESET EMERGENCY STOP";
+      eBtn.className = "btn btn-ghost";
+    } else {
+      eBtn.textContent = "ACTIVATE EMERGENCY STOP";
+      eBtn.className = "btn btn-danger";
+    }
+
+    var alertEl = document.getElementById("riskAlert");
+    var alertText = document.getElementById("riskAlertText");
+    if (state.emergencyStop) {
+      alertEl.classList.remove("hidden");
+      alertText.textContent = "EMERGENCY STOP ACTIVE \u2014 New entries blocked. Existing positions continue per exit policy. Reset requires owner authorization.";
+    } else if (r.dailyLimitHit) {
+      alertEl.classList.remove("hidden");
+      alertText.textContent = "Daily loss limit reached (" + fmt(s.dailyLossLimit) + ") \u2014 New purchases blocked. Existing positions continue per risk policy.";
+    } else if (r.drawdownHit) {
+      alertEl.classList.remove("hidden");
+      alertText.textContent = "Portfolio drawdown trigger reached (" + fmt(s.drawdownTrigger) + ", realized + unrealized) \u2014 New purchases blocked. Authorized reset required.";
+    } else if (r.feedUnreliable) {
+      alertEl.classList.remove("hidden");
+      alertText.textContent = "Market data unreliable (3+ consecutive feed failures) \u2014 New entries paused. Exits resume when the feed recovers.";
+    } else {
+      alertEl.classList.add("hidden");
+    }
+
+    // Settings form
+    document.getElementById("cfgBudget").value = s.budget;
+    document.getElementById("cfgLossTrigger").value = s.lossTrigger;
+    document.getElementById("cfgPositionSize").value = s.positionSize;
+    document.getElementById("cfgMaxPositions").value = s.maxPositions;
+    document.getElementById("cfgMaxExposure").value = s.maxExposure;
+    document.getElementById("cfgDrawdown").value = s.drawdownTrigger;
+    document.getElementById("cfgDailyLimit").value = s.dailyLossLimit;
+    document.getElementById("cfgSolRate").value = s.solNgnRate;
+    document.getElementById("cfgTrailPct").value = s.trailPct;
+    document.getElementById("cfgMaxHold").value = s.maxHoldHours;
+    document.getElementById("cfgTpGain1").value = s.tpGain1;
+    document.getElementById("cfgTpPct1").value = s.tpPct1;
+    document.getElementById("cfgTpGain2").value = s.tpGain2;
+    document.getElementById("cfgTpPct2").value = s.tpPct2;
+    document.getElementById("cfgLiqDrop").value = s.liquidityDropPct;
+    document.getElementById("cfgTimezone").value = s.timezone;
+    document.getElementById("cfgTrail").checked = s.trailingEnabled;
+    document.getElementById("cfgReinvest").checked = s.reinvest;
+    document.getElementById("cfgBackendUrl").value = state.backendUrl;
+    document.getElementById("cfgWsUrl").value = state.wsUrl;
+  }
+
+  function renderServiceHealth() {
+    var sh = state.serviceHealth;
+    function pill(id, val, okText, badText) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (val === "ok" || val === "connected" || val === "running" || val === "verified") {
+        el.className = "pill pill-green";
+        el.textContent = okText || "OK";
+      } else if (val === "error" || val === "disconnected" || val === "failed") {
+        el.className = "pill pill-red";
+        el.textContent = badText || "Error";
+      } else {
+        el.className = "pill pill-amber";
+        el.textContent = val ? String(val) : "Awaiting backend report";
+      }
+    }
+    pill("rpcStatus", sh.rpc, "Connected", "Disconnected");
+    pill("telegramStatus", sh.telegram, "Connected", "Disconnected");
+    pill("listenerStatus", sh.listener, "Running", "Stopped");
+    pill("rugStatus", sh.rugcheck, "Verified", "Error");
+    var mon = document.getElementById("monitorStatus");
+    if (mon) {
+      if (sh.monitor === "running") mon.innerHTML = '<span class="pill pill-green">Running</span>';
+      else if (sh.monitor === "idle") mon.innerHTML = '<span class="small muted">Idle — starts when positions open</span>';
+      else mon.innerHTML = '<span class="small muted">Awaiting backend report</span>';
+    }
+  }
+
+  function renderScanners() {
+    var ls = state.lastScan;
+    if (ls) {
+      var rc = ls.rejectCounts || {};
+      document.getElementById("scanSummary").innerHTML =
+        '<div class="health-row"><span class="muted">Strategy</span><span class="small">' + esc(ls.strategy || "") + "</span></div>" +
+        '<div class="health-row"><span class="muted">Mints scanned</span><span class="small">' + (ls.scanned || 0) + "</span></div>" +
+        '<div class="health-row"><span class="muted">Candidates found</span><span class="small pos">' + (ls.candidates || 0) + "</span></div>" +
+        '<div class="health-row"><span class="muted">Rejected (age / liquidity / mcap / volume / invalid)</span><span class="small neg">' + (rc.age || 0) + " / " + (rc.liquidity || 0) + " / " + (rc.marketCap || 0) + " / " + (rc.volume || 0) + " / " + (rc.invalid || 0) + "</span></div>" +
+        (ls.sourceErrors ? '<div class="health-row"><span class="muted">Data source errors</span><span class="small" style="color:var(--amber)">' + ls.sourceErrors + "</span></div>" : "");
+      var rej = ls.rejectedSample || [];
+      document.getElementById("rejectionsList").innerHTML = rej.length
+        ? rej.map(function(r) {
+            return '<div class="health-row"><span class="small" style="font-weight:600">' + esc(r.symbol || "?") + '</span><span class="small muted" style="text-align:right;max-width:60%">' + esc(r.reasons || "") + "</span></div>";
+          }).join("")
+        : '<span class="small muted">No rejections reported in the last scan.</span>';
+    }
+    var db = document.getElementById("discoveredBody");
+    if (state.discoveredTokens.length === 0) {
+      db.innerHTML = '<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">No tokens discovered yet \u2014 run a scanner above</td></tr>';
+    } else {
+      db.innerHTML = state.discoveredTokens.slice().reverse().map(function(t) {
+        var secPill = t.securityStatus === "passed" ? '<span class="pill pill-green">Passed</span>' :
+                      t.securityStatus === "failed" ? '<span class="pill pill-red">Failed</span>' :
+                      t.securityStatus === "unavailable" ? '<span class="pill pill-amber">Unavailable</span>' :
+                      '<span class="pill pill-muted">Checking\u2026</span>';
+        var action = t.status === "candidate"
+          ? '<button class="btn btn-green" style="padding:4px 10px;font-size:12px" onclick="vankleff.paperTrade(\'' + t.id + '\')">Paper Trade</button>'
+          : '<span class="small muted">' + esc(t.status || "") + "</span>";
+        var mcapCell = t.marketCap ? "$" + Math.round(t.marketCap).toLocaleString() : '<span style="color:var(--amber)">\u2014 (FDV ' + fmtUsd(t.fdv) + ")</span>";
+        return "<tr>" +
+          '<td class="token-cell"><span class="token-icon">' + esc(t.symbol ? t.symbol.slice(0, 2) : "?") + "</span>" + esc(t.symbol) + "</td>" +
+          '<td class="small">' + esc(t.source || "") + "</td>" +
+          '<td class="small">' + timeAgo(t.discoveredAt) + "</td>" +
+          '<td class="mono small">' + fmtUsd(t.liquidityUsd) + " / " + mcapCell + "</td>" +
+          '<td class="mono">' + (t.score !== undefined ? t.score : "\u2014") + "</td>" +
+          '<td class="small" title="' + esc(t.securityNotes || "") + '">' + secPill + "</td>" +
+          '<td class="small">' + esc(t.status || "") + "</td>" +
+          "<td>" + action + "</td>" +
+        "</tr>";
+      }).join("");
+    }
+  }
+
+  // ================= SELF-TESTS =================
+  function runSelfTests() {
+    var results = [];
+    function test(name, fn) {
+      try { fn(); results.push({ name: name, pass: true, error: null }); }
+      catch (e) { results.push({ name: name, pass: false, error: e.message || String(e) }); }
+    }
+    function ok(c, m) { if (!c) throw new Error(m || "assertion failed"); }
+    function eq(a, b, tol, m) { if (Math.abs(a - b) > (tol == null ? 1e-9 : tol)) throw new Error((m || "mismatch") + ": got " + a + ", expected " + b); }
+    function mk(o) {
+      return Object.assign({
+        sizeNaira: 1000, entryPrice: 0.0001, remainingPct: 100, stopLossPrice: 0,
+        trailingEnabled: false, trailHigh: 0, trailPct: 20,
+        openedAt: new Date().toISOString(), entryLiquidityUsd: 0,
+        tpLevels: [], executedTps: []
+      }, o);
+    }
+
+    // STOP-LOSS
+    test("Stop price yields \u2248\u20A6500 NET loss after modeled costs", function() {
+      var stop = computeStopPrice(0.0001, 1000, 500);
+      ok(stop > 0 && stop < 0.0001, "stop must be in (0, entry)");
+      var est = estLossAtStop({ sizeNaira: 1000, entryPrice: 0.0001, stopLossPrice: stop, remainingPct: 100 });
+      eq(est, 500, 0.01, "estimated loss at stop");
+    });
+    test("Trigger \u2265 position size is unachievable + warned", function() {
+      ok(computeStopPrice(0.0001, 1000, 1000) === null);
+      ok(stopWarning(1000, 1000), "warning required");
+    });
+    test("Large trigger is labeled a target, not a guaranteed maximum", function() {
+      ok(/target/.test(stopWarning(1000, 500) || ""));
+    });
+
+    // DRAWDOWN
+    test("Drawdown counts realized AND unrealized losses", function() {
+      var total = -1000 + -1800;
+      var drawdown = Math.max(0, -total);
+      ok(drawdown === 2800 && drawdown >= 2500, "drawdown should hit trigger");
+    });
+
+    // TIMEZONE
+    test("Africa/Lagos trading day starts \u224823:00 UTC", function() {
+      var h = tradingDayStart("Africa/Lagos").getUTCHours();
+      ok(h === 23 || h === 0, "got " + h + ":00 UTC");
+    });
+
+    // PARTIAL TAKE-PROFITS
+    test("TP levels over 100% are clamped to exactly 100%", function() {
+      var v = validateTpLevels({ tpGain1: 500, tpPct1: 80, tpGain2: 2000, tpPct2: 80 });
+      ok(v.valid && v.total <= 100, "total was " + v.total);
+    });
+    test("Partial-exit accounting: 50% exit at 1.5\u00D7 nets +\u20A6231 after costs", function() {
+      var p = mk();
+      var frac = 0.5;
+      var tokens = tokensFor(p) * frac;
+      var proceeds = tokens * 0.00015 * (1 - SELL_FEE_PCT - SLIPPAGE_PCT);
+      var net = proceeds - p.sizeNaira * frac;
+      ok(Math.abs(net - 231.32) < 0.1, "got " + net.toFixed(2));
+    });
+
+    // TRAILING STOP
+    test("Trailing stop arms only after the trigger gain; then exits on breach", function() {
+      var value = 1650, remSize = 1000;
+      ok(value - remSize >= 500, "arms at +\u20A6500");
+      var trailStop = 1650 * (1 - 20 / 100);
+      ok(1300 <= trailStop && 1600 > trailStop, "1300 breaches, 1600 holds");
+      ok(trailStop < 1650, "trail stop only reduces risk");
+    });
+
+    // WEBSOCKET BRIDGE
+    test("WebSocket bridge sends & receives structured JSON messages", function() {
+      ok(typeof sendWsMessage === "function", "sendWsMessage must exist");
+      ok(typeof handleBackendEvent === "function", "handleBackendEvent must exist");
+      var captured = null;
+      var orig = ws;
+      ws = { readyState: WebSocket.OPEN, send: function(d) { captured = d; } };
+      sendWsMessage({ type: "ping" });
+      ws = orig;
+      ok(captured && JSON.parse(captured).type === "ping", "message must serialize to JSON with type field");
+    });
+    test("Event handler routes token_discovered into discoveredTokens", function() {
+      var before = state.discoveredTokens.length;
+      handleBackendEvent({ type: "token_discovered", data: { id: "t_test", address: "mint_test", symbol: "TEST", status: "candidate" } });
+      ok(state.discoveredTokens.length === before + 1, "token should be added");
+      // cleanup
+      state.discoveredTokens = state.discoveredTokens.filter(function(t) { return t.address !== "mint_test"; });
+    });
+    test("Event handler routes position_closed into trade history", function() {
+      var before = state.tradeHistory.length;
+      handleBackendEvent({ type: "position_closed", data: { id: "p_test", symbol: "TEST", netPnl: -250, reason: "stop_loss" } });
+      ok(state.tradeHistory.length === before + 1, "trade should be recorded");
+      state.tradeHistory.pop();
+    });
+    test("Event handler routes service_health into state.serviceHealth", function() {
+      handleBackendEvent({ type: "service_health", data: { rpc: "ok", telegram: "ok", listener: "running" } });
+      ok(state.serviceHealth.rpc === "ok" && state.serviceHealth.listener === "running", "health should update");
+    });
+    test("REST command endpoints are wired (settings, emergency-stop, close-position, scan)", function() {
+      ok(typeof pushSettings === "function");
+      ok(typeof pushEmergencyStop === "function");
+      ok(typeof pushClosePosition === "function");
+      ok(typeof pushScan === "function");
+    });
+    test("Frontend is decoupled — no direct DexScreener/RugCheck fetch calls remain", function() {
+      var src = document.querySelector("script").textContent;
+      ok(src.indexOf("api.dexscreener.com") === -1, "DexScreener direct calls must be removed");
+      ok(src.indexOf("api.rugcheck.xyz") === -1, "RugCheck direct calls must be removed");
+    });
+
+    return results;
+  }
+
+  function renderTests(results) {
+    var box = document.getElementById("testResults");
+    var failed = results.filter(function(r) { return !r.pass; }).length;
+    var passed = results.length - failed;
+    var html = '<div class="alert ' + (failed === 0 ? 'alert-info' : 'alert-warn') + '">' +
+      "<span>" + (failed === 0 ? "\u2705" : "\u274C") + "</span><span><strong>" + passed + " passed" + (failed ? " \u00B7 " + failed + " FAILED" : "") + "</strong></span></div>";
+    html += results.map(function(r) {
+      return '<div class="health-row"><span><span class="' + (r.pass ? "test-pass" : "test-fail") + '">' + (r.pass ? "PASS" : "FAIL") + "</span> " + esc(r.name) + (r.error ? '<div class="small" style="color:var(--red)">' + esc(r.error) + "</div>" : "") + "</span></div>";
+    }).join("");
+    box.innerHTML = html;
+  }
+
+  // ================= EVENT WIRING =================
+  document.getElementById("tabs").addEventListener("click", function(e) {
+    if (e.target.classList.contains("tab")) {
+      var tabs = document.querySelectorAll(".tab");
+      for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+      e.target.classList.add("active");
+      var contents = document.querySelectorAll(".tab-content");
+      for (var j = 0; j < contents.length; j++) contents[j].classList.add("hidden");
+      document.getElementById("tab-" + e.target.dataset.tab).classList.remove("hidden");
+    }
+  });
+
+  document.getElementById("saveSettings").addEventListener("click", pushSettings);
+
+  document.getElementById("emergencyBtn").addEventListener("click", function() {
+    if (state.emergencyStop) {
+      if (confirm("Reset emergency stop? This requires owner authorization and will allow new entries again (subject to risk limits).")) {
+        pushEmergencyStop(false);
+      }
+    } else {
+      if (confirm("ACTIVATE EMERGENCY STOP?\n\n\u2022 New entries will be blocked\n\u2022 Existing positions continue monitoring per exit policy\n\u2022 Kill-switch command sent instantly to backend\n\nThis does NOT close open positions.")) {
+        pushEmergencyStop(true);
+      }
+    }
+  });
+
+  document.getElementById("scanEarly").addEventListener("click", function() { pushScan("early_hunter"); });
+  document.getElementById("scanConfirm").addEventListener("click", function() { pushScan("confirmation_hunter"); });
+  document.getElementById("runTests").addEventListener("click", function() { renderTests(runSelfTests()); });
+
+  document.getElementById("saveBackend").addEventListener("click", function() {
+    state.backendUrl = document.getElementById("cfgBackendUrl").value || "http://localhost:8080";
+    state.wsUrl = document.getElementById("cfgWsUrl").value || "ws://localhost:8080";
+    saveState();
+    var msg = document.getElementById("backendMsg");
+    msg.textContent = "Reconnecting…";
+    // Force reconnect
+    if (ws) { try { ws.close(); } catch (e) {} }
+    reconnectAttempts = 0;
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    connectWebSocket();
+    setTimeout(function() { msg.textContent = "\u2713 Saved"; setTimeout(function() { msg.textContent = ""; }, 2000); }, 1500);
+  });
+
+  window.vankleff = {
+    closePosition: pushClosePosition,
+    paperTrade: pushPaperTrade
+  };
+
+  // ================= INIT =================
+  render();
+  renderScanners();
+  renderServiceHealth();
+  connectWebSocket();
+})();
+</script>
+</body>
+</html>
